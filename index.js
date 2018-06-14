@@ -83,14 +83,14 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
     await exec(`perl ../get_gfs.pl data ${runCode} ${stepNumber} ${stepNumber} 0 ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
 }
 
-(async function () {
+(async function run() {
     try {
         //const latestDownloadedRun = getLatestDownloadedGfsRun();
         const latestAvailableRun = await getLatestAvailableGfsRun();
         let latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun);
         const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
 
-        if(typeof latestDownloadedStep === 'undefined') {
+        if (typeof latestDownloadedStep === 'undefined') {
             latestDownloadedStep = -3;
         }
 
@@ -104,6 +104,8 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
             if (!latestDownloadedStep || latestDownloadedStep !== latestAvailableStep) {
                 await downloadGfsStep(latestAvailableRun, stepToFetch, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
             }
+
+            await run();
         }
 
     } catch (err) {
