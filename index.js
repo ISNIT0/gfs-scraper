@@ -91,6 +91,6 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
     const latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun);
     const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
     if (latestDownloadedStep !== latestAvailableStep) {
-        await downloadGfsStep(latestAvailableRun, latestAvailableStep, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
+        await downloadGfsStep(latestAvailableRun, (latestDownloadedStep || -3) + 3, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
     }
 })();
