@@ -24,7 +24,8 @@ function getLatestAvailableGfsRun() {
                 })
                 .sort((a, b) => {
                     return moment(a, 'YYYYMMDDHH').valueOf() > moment(b, 'YYYYMMDDHH').valueOf() ? 1 : -1;
-                })[0];
+                })
+                .reverse()[0];
             return latestGfs;
         });
 }
