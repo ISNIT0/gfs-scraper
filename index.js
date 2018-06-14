@@ -14,7 +14,9 @@ function getLatestAvailableGfsRun() {
             const $ = cheerio.load(html);
             const latestGfs = $('a')
                 .toArray()
+                .map(a => console.log('value', a) || a)
                 .map(el => el.href)
+                .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
                 .map(href => {
                     return href.replace(/[^0-9]/g, '');
@@ -32,7 +34,9 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
             const $ = cheerio.load(html);
             const latestGfs = $('a')
                 .toArray()
+                .map(a => console.log('value', a) || a)
                 .map(el => el.href)
+                .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
                 .map(href => {
                     return href.replace(/[^0-9]/g, '');
