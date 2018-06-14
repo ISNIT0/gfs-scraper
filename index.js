@@ -40,10 +40,10 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(el => $(el).attr('href'))
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
+                .filter(file => file.slice(-5).match(/\.f[0-9]+/))
                 .map(href => {
                     return href.replace(/[^0-9]/g, '');
                 })
-                .filter(file => file.slice(-5).match(/\.f[0-9]+/))
                 .map(file => file.split('.').slice(-1)[0])
                 .map(stepHour => Number(stepHour))
                 .sort()
