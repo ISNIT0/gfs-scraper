@@ -80,7 +80,7 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
     console.info(`Downloading GFS Step: [runCode=${runCode}] [stepNumber=${stepNumber}] [parameters=${parameters}] [levels=${levels}]`);
     const targetPath = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${targetPath}`);
-    await exec(`perl ../get_gfs.pl data ${runCode} ${stepNumber} 0 0 ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
+    await exec(`perl ../get_gfs.pl data ${runCode} ${stepNumber} ${stepNumber} 0 ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
 }
 
 (async function () {
