@@ -25,7 +25,7 @@ function getLatestAvailableGfsRun() {
                 .sort((a, b) => {
                     return moment(a, 'YYYYMMDDHH').valueOf() > moment(b, 'YYYYMMDDHH').valueOf() ? 1 : -1;
                 })
-                .reverse()[0];
+                .reverse()[1];
             return latestGfs;
         });
 }
@@ -48,7 +48,7 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(file => file.split('.').slice(-1)[0])
                 .map(stepHour => Number(stepHour))
                 .sort()
-                .reverse()[1];
+                .reverse()[0];
             return latestGfs;
         });
 }
