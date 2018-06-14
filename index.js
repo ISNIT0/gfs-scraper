@@ -72,8 +72,8 @@ async function getLatestDownloadedGfsRunStep(runCode) {
         .map(file => file.split('.').slice(-1)[0].slice(1))
         .map(stepHour => parseInt(stepHour))
         .sort()
-        .map(a => console.log('value', a) || a)
         .reverse()[0];
+    console.log('latestDownloadedStep', latestDownloadedStep);
     return latestDownloadedStep;
 }
 
