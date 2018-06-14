@@ -40,6 +40,7 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(el => $(el).attr('href'))
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
+                .map(file => console.log('value', file) || file)
                 .filter(file => file.slice(-5).match(/\.f[0-9]+/))
                 .map(href => {
                     return href.replace(/[^0-9]/g, '');
