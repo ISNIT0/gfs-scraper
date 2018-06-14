@@ -9,13 +9,14 @@ const downloadDir = path.join(__dirname, '../download/');
 console.log(`Using download directory [${downloadDir}]`);
 
 function getLatestAvailableGfsRun() {
+    console.info(`Getting latest available GFS runs`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/`)
         .then(html => {
             const $ = cheerio.load(html);
             const latestGfs = $('a')
                 .toArray()
-                .map(a => console.log('value', a) || a)
                 .map(el => el.href)
+                .map(a => console.log('value', a) || a)
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
                 .map(href => {
@@ -29,13 +30,14 @@ function getLatestAvailableGfsRun() {
 }
 
 function getLatestAvailableGfsRunStep(gfsRunCode) {
+    console.info(`Getting latest available GFS step for run [${gfsRunCode}]`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${gfsRunCode}/`)
         .then(html => {
             const $ = cheerio.load(html);
             const latestGfs = $('a')
                 .toArray()
-                .map(a => console.log('value', a) || a)
                 .map(el => el.href)
+                .map(a => console.log('value', a) || a)
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
                 .map(href => {
@@ -64,6 +66,7 @@ function getLatestDownloadedGfsRun(downloadDir) {
 }
 
 function getLatestDownloadedGfsRunStep(runCode) {
+    console.info(`Getting latest downloaded GFS step for run [${runCode}]`);
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
     const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
         .filter(file => file.endsWith(/\.f[0-9]+/))
@@ -75,6 +78,7 @@ function getLatestDownloadedGfsRunStep(runCode) {
 }
 
 async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels = ['all']) {
+    console.info(`Downloading GFS Step: [runCode=${runCode}] [stepNumber=${stepNumber}] [parameters=${parameters}] [levels=${levels}]`);
     const targetPath = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${targetPath}`);
     await exec(`perl ./get_gfs.pl data ${runCode} ${stepNumber} 0 0 ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
