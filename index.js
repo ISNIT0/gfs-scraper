@@ -40,16 +40,11 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(el => $(el).attr('href'))
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
-                .filter(file => file.slice(-5).match(/\.f[0-9]+/))
-                .filter(file => !!~file.indexOf('pgrb2.1'))
-                .map(file => console.log('value', file) || file)
+                .filter(file => file.slice(-5).match(/\.f[0-9]+$/))
+                .filter(file => !!~file.indexOf('.pgrb2.1'))
                 .map(file => file.split('.').slice(-1)[0])
-                .map(href => {
-                    return href.replace(/[^0-9]/g, '');
-                })
-                .map(file => file.split('.').slice(-1)[0])
-                .map(stepHour => Number(stepHour))
-                .sort()
+                .map(href => href.slice(1))
+                .map(stepHour => parseInt(stepHour))
                 .reverse()[0];
             return latestGfs;
         });
