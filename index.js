@@ -90,10 +90,13 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
         const latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun) || -3;
         const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
 
+        console.info(`Got state [latestAvailableRun=${latestAvailableRun}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
+        
         if (latestDownloadedStep < latestAvailableStep) {
             const stepToFetch = latestDownloadedStep + 3;
 
-            console.info(`Got state [latestAvailableRun=${latestAvailableRun}] [stepToFetch=${stepToFetch}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
+            console.info(`Using step [stepToFetch=${stepToFetch}]`);
+
             if (!latestDownloadedStep || latestDownloadedStep !== latestAvailableStep) {
                 await downloadGfsStep(latestAvailableRun, stepToFetch, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
             }
