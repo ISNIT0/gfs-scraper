@@ -43,7 +43,7 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(href => {
                     return href.replace(/[^0-9]/g, '');
                 })
-                .filter(file => file.endsWith(/\.f[0-9]+/))
+                .filter(file => file.slice(-5).match(/\.f[0-9]+/))
                 .map(file => file.split('.').slice(-1)[0])
                 .map(stepHour => Number(stepHour))
                 .sort()
@@ -70,7 +70,7 @@ async function getLatestDownloadedGfsRunStep(runCode) {
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${stepDownloadDir}`);
     const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
-        .filter(file => file.endsWith(/\.f[0-9]+/))
+        .filter(file => file.slice(-5).match(/\.f[0-9]+/))
         .map(file => file.split('.').slice(-1)[0])
         .map(stepHour => Number(stepHour))
         .sort()
