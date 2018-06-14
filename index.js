@@ -70,6 +70,7 @@ async function getLatestDownloadedGfsRunStep(runCode) {
     const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
         .filter(file => file.slice(-5).match(/\.f[0-9]+/))
         .map(file => file.split('.').slice(-1)[0].slice(1))
+        .map(a => console.log('value', a) || a)
         .map(stepHour => Number(stepHour))
         .sort()
         .reverse()[0];
@@ -91,7 +92,7 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
         const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
 
         console.info(`Got state [latestAvailableRun=${latestAvailableRun}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
-        
+
         if (latestDownloadedStep < latestAvailableStep) {
             const stepToFetch = latestDownloadedStep + 3;
 
