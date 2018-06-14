@@ -73,7 +73,6 @@ async function getLatestDownloadedGfsRunStep(runCode) {
         .map(stepHour => parseInt(stepHour))
         .sort()
         .reverse()[0];
-    console.log('latestDownloadedStep', latestDownloadedStep);
     return latestDownloadedStep;
 }
 
@@ -88,8 +87,12 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
     try {
         //const latestDownloadedRun = getLatestDownloadedGfsRun();
         const latestAvailableRun = await getLatestAvailableGfsRun();
-        const latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun) || -3;
+        let latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun);
         const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
+
+        if(typeof latestDownloadedStep === 'undefined') {
+            latestDownloadedStep = -3;
+        }
 
         console.info(`Got state [latestAvailableRun=${latestAvailableRun}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
 
