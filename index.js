@@ -69,7 +69,7 @@ async function getLatestDownloadedGfsRunStep(runCode) {
     await exec(`mkdir -p ${stepDownloadDir}`);
     const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
         .filter(file => file.slice(-5).match(/\.f[0-9]+/))
-        .map(file => file.split('.').slice(-1)[0])
+        .map(file => file.split('.').slice(-1)[0].slice(1))
         .map(stepHour => Number(stepHour))
         .sort()
         .reverse()[0];
