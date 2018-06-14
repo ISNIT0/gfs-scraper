@@ -47,7 +47,7 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(file => file.split('.').slice(-1)[0])
                 .map(stepHour => Number(stepHour))
                 .sort()
-                .reverse()[0];
+                .reverse().slice(-1)[0]; //TODO: remove slice
             return latestGfs;
         });
 }
