@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const exec = require('promised-exec');
+const moment = require('moment');
 
 const downloadDir = path.join(__dirname, '../download/');
 
@@ -16,7 +17,6 @@ function getLatestAvailableGfsRun() {
             const latestGfs = $('a')
                 .toArray()
                 .map(el => $(el).attr('href'))
-                .map(a => console.log('value', a) || a)
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
                 .map(href => {
@@ -37,7 +37,6 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
             const latestGfs = $('a')
                 .toArray()
                 .map(el => $(el).attr('href'))
-                .map(a => console.log('value', a) || a)
                 .filter(a => a)
                 .filter(href => href.startsWith('gfs.'))
                 .map(href => {
