@@ -64,9 +64,10 @@ function getLatestDownloadedGfsRun(downloadDir) {
     return latestDownloaded;
 }
 
-function getLatestDownloadedGfsRunStep(runCode) {
+async function getLatestDownloadedGfsRunStep(runCode) {
     console.info(`Getting latest downloaded GFS step for run [${runCode}]`);
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
+    await exec(`mkdir -p ${stepDownloadDir}`);
     const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
         .filter(file => file.endsWith(/\.f[0-9]+/))
         .map(file => file.split('.').slice(-1)[0])
@@ -86,7 +87,7 @@ async function downloadGfsStep(runCode, stepNumber, parameters = ['all'], levels
 (async function () {
     //const latestDownloadedRun = getLatestDownloadedGfsRun();
     const latestAvailableRun = await getLatestAvailableGfsRun();
-    const latestDownloadedStep = getLatestDownloadedGfsRunStep(latestAvailableRun);
+    const latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun);
     const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
     if (latestDownloadedStep !== latestAvailableStep) {
         await downloadGfsStep(latestAvailableRun, latestAvailableStep, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
