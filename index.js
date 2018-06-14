@@ -4,7 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const exec = require('promised-exec');
 
-const downloadDir = path.join(__dirname, './download/');
+const downloadDir = path.join(__dirname, '../download/');
+
+console.log(`Using download directory [${downloadDir}]`);
 
 function getLatestAvailableGfsRun() {
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/`)
