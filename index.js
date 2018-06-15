@@ -76,11 +76,11 @@ async function getLatestDownloadedGfsRunStep(runCode) {
     return latestDownloadedStep;
 }
 
-async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, parameters = ['all'], levels = ['all']) {
-    console.info(`Downloading GFS Step: [runCode=${runCode}] [stepNumber=${stepNumber}] [parameters=${parameters}] [levels=${levels}]`);
+async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, parameters = ['all'], levels = ['all'], stepDifference = 3) {
+    console.info(`Downloading GFS Step: [runCode=${runCode}] [firstStepNumber=${firstStepNumber}] [lastStepNumber=${lastStepNumber}] [stepDifference=${stepDifference}] [parameters=${parameters}] [levels=${levels}]`);
     const targetPath = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${targetPath}`);
-    await exec(`perl ../get_gfs.pl data ${runCode} ${firstStepNumber} ${lastStepNumber} 3 ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
+    await exec(`perl ../get_gfs.pl data ${runCode} ${firstStepNumber} ${lastStepNumber} ${stepDifference} ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
 }
 
 (async function run() {
