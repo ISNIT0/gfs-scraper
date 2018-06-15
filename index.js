@@ -7,10 +7,14 @@ const moment = require('moment');
 
 const downloadDir = path.join(__dirname, '../download/');
 
-console.log(`Using download directory [${downloadDir}]`);
+function log(...messages) {
+    console.log(`[${(new Date()).toUTCString()}]`, ...messages);
+}
+
+log(`Using download directory [${downloadDir}]`);
 
 function getLatestAvailableGfsRun() {
-    console.info(`Getting latest available GFS runs`);
+    log(`Getting latest available GFS runs`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/`)
         .then(html => {
             const $ = cheerio.load(html);
@@ -31,7 +35,7 @@ function getLatestAvailableGfsRun() {
 }
 
 function getLatestAvailableGfsRunStep(gfsRunCode) {
-    console.info(`Getting latest available GFS step for run [${gfsRunCode}]`);
+    log(`Getting latest available GFS step for run [${gfsRunCode}]`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${gfsRunCode}/`)
         .then(html => {
             const $ = cheerio.load(html);
@@ -64,7 +68,7 @@ function getLatestDownloadedGfsRun(downloadDir) {
 }
 
 async function getLatestDownloadedGfsRunStep(runCode) {
-    console.info(`Getting latest downloaded GFS step for run [${runCode}]`);
+    log(`Getting latest downloaded GFS step for run [${runCode}]`);
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${stepDownloadDir}`);
     const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
@@ -77,7 +81,7 @@ async function getLatestDownloadedGfsRunStep(runCode) {
 }
 
 async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, parameters = ['all'], levels = ['all'], stepDifference = 3) {
-    console.info(`Downloading GFS Step: [runCode=${runCode}] [firstStepNumber=${firstStepNumber}] [lastStepNumber=${lastStepNumber}] [stepDifference=${stepDifference}] [parameters=${parameters}] [levels=${levels}]`);
+    log(`Downloading GFS Step: [runCode=${runCode}] [firstStepNumber=${firstStepNumber}] [lastStepNumber=${lastStepNumber}] [stepDifference=${stepDifference}] [parameters=${parameters}] [levels=${levels}]`);
     const targetPath = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${targetPath}`);
     await exec(`perl ../get_gfs.pl data ${runCode} ${firstStepNumber} ${lastStepNumber} ${stepDifference} ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
@@ -90,16 +94,21 @@ async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, paramet
         let latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun);
         const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
 
+        if (typeof latestAvailableStep === 'undefined') {
+            log(`No steps available for run [${latestAvailableRun}]`);
+            return;
+        }
+
         if (typeof latestDownloadedStep === 'undefined') {
             latestDownloadedStep = -3;
         }
 
-        console.info(`Got state [latestAvailableRun=${latestAvailableRun}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
+        log(`Got state [latestAvailableRun=${latestAvailableRun}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
 
         if (latestDownloadedStep < latestAvailableStep) {
             const stepToFetch = latestDownloadedStep + 3;
 
-            console.info(`Downloading from [${stepToFetch}] to [${latestAvailableStep}]`);
+            log(`Downloading from [${stepToFetch}] to [${latestAvailableStep}]`);
 
             if (!latestDownloadedStep || latestDownloadedStep !== latestAvailableStep) {
                 await downloadGfsStep(latestAvailableRun, stepToFetch, latestAvailableStep, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
