@@ -108,9 +108,31 @@ async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, paramet
             return;
         }
 
-        log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}]`);
+        const stepsByStepGap = stepsToDownload.reduce((acc, step, index, arr) => {
+            const actualStep = step;
+            const isLastStep = index === arr.length + 1;
 
-        await downloadGfsStep(latestAvailableRun, stepsToDownload[0], stepsToDownload.slice(-1)[0], ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
+            if (isLastStep) {
+                index--;
+                step = arr[index - 1];
+            }
+
+            const nextStep = arr[index + 1];
+            const stepGap = nextStep - step;
+            acc[stepGap] = acc[stepGap] || [];
+            acc[stepGap].push(actualStep);
+
+            return acc;
+        }, {});
+
+        for(let stepGap in stepsByStepGap) {
+            log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}] with [stepGap=${stepGap}]`);
+    
+            const steps = stepsByStepGap[stepGap];
+
+            await downloadGfsStep(latestAvailableRun, steps[0], steps.slice(-1)[0], ['TMP', 'LAND', 'VEG', 'TCDC'], ['2'], stepGap);
+        }
+
 
         await run();
 
