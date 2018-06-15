@@ -34,12 +34,12 @@ function getLatestAvailableGfsRun() {
         });
 }
 
-function getLatestAvailableGfsRunStep(gfsRunCode) {
+function getAvailableGfsRunSteps(gfsRunCode) {
     log(`Getting latest available GFS step for run [${gfsRunCode}]`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${gfsRunCode}/`)
         .then(html => {
             const $ = cheerio.load(html);
-            const latestGfs = $('a')
+            return $('a')
                 .toArray()
                 .map(el => $(el).attr('href'))
                 .filter(a => a)
@@ -49,8 +49,7 @@ function getLatestAvailableGfsRunStep(gfsRunCode) {
                 .map(file => file.split('.').slice(-1)[0])
                 .map(href => href.slice(1))
                 .map(stepHour => parseInt(stepHour))
-                .reverse()[0];
-            return latestGfs;
+                .reverse();
         });
 }
 
@@ -67,17 +66,18 @@ function getLatestDownloadedGfsRun(downloadDir) {
     return latestDownloaded;
 }
 
-async function getLatestDownloadedGfsRunStep(runCode) {
+async function getDownloadedGfsRunSteps(runCode) {
     log(`Getting latest downloaded GFS step for run [${runCode}]`);
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${stepDownloadDir}`);
-    const latestDownloadedStep = fs.readdirSync(stepDownloadDir)
+    const latestDownloadedSteps = fs.readdirSync(stepDownloadDir)
         .filter(file => file.slice(-5).match(/\.f[0-9]+/))
         .map(file => file.split('.').slice(-1)[0].slice(1))
         .map(stepHour => parseInt(stepHour))
         .sort(((a, b) => a - b))
-        .slice(-1)[0];
-    return latestDownloadedStep;
+        .slice(-1)
+        .reverse();
+    return latestDownloadedSteps;
 }
 
 async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, parameters = ['all'], levels = ['all'], stepDifference = 3) {
@@ -91,31 +91,28 @@ async function downloadGfsStep(runCode, firstStepNumber, lastStepNumber, paramet
     try {
         //const latestDownloadedRun = getLatestDownloadedGfsRun();
         const latestAvailableRun = await getLatestAvailableGfsRun();
-        let latestDownloadedStep = await getLatestDownloadedGfsRunStep(latestAvailableRun);
-        const latestAvailableStep = await getLatestAvailableGfsRunStep(latestAvailableRun);
+        const downloadedSteps = await getDownloadedGfsRunSteps(latestAvailableRun);
+        const availableSteps = await getAvailableGfsRunSteps(latestAvailableRun);
 
-        if (typeof latestAvailableStep === 'undefined') {
+        const stepsToDownload = availableSteps.filter(a => !~downloadedSteps.indexOf(a)).sort((a, b) => a - b);
+
+        log(`Found [${availableSteps.length}] Steps - Already Downloaded [${downloadedSteps.length}] Steps - Downloading [${stepsToDownload.length}] Steps`);
+
+        if (!availableSteps.length) {
             log(`No steps available for run [${latestAvailableRun}]`);
             return;
         }
 
-        if (typeof latestDownloadedStep === 'undefined') {
-            latestDownloadedStep = -3;
+        if (!stepsToDownload.length) {
+            log(`Already downloaded all available steps`);
+            return;
         }
 
-        log(`Got state [latestAvailableRun=${latestAvailableRun}] [latestAvailableStep=${latestAvailableStep}] [latestDownloadedStep=${latestDownloadedStep}]`);
+        log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}]`);
 
-        if (latestDownloadedStep < latestAvailableStep) {
-            const stepToFetch = latestDownloadedStep + 3;
+        await downloadGfsStep(latestAvailableRun, stepsToDownload[0], stepsToDownload.slice(-1)[0], ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
 
-            log(`Downloading from [${stepToFetch}] to [${latestAvailableStep}]`);
-
-            if (!latestDownloadedStep || latestDownloadedStep !== latestAvailableStep) {
-                await downloadGfsStep(latestAvailableRun, stepToFetch, latestAvailableStep, ['TMP', 'LAND', 'VEG', 'TCDC'], ['2']);
-            }
-
-            await run();
-        }
+        await run();
 
     } catch (err) {
         console.error(err);
