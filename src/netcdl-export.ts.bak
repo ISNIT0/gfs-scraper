@@ -1,9 +1,30 @@
+const fs = require('fs');
 const {
     getLatestAvailableGfsRun,
     getDownloadedGfsRunSteps,
     getConvertedGfsRunSteps,
+    downloadDir,
+    netcdfDir,
     log
 } = require('./util');
+
+async function convertGfsStep(runCode, stepNumber) {
+    log(`Converting GFS Step: [runCode=${runCode}] [step=${stepNumber}]`);
+    const runGribDir = path.join(downloadDir, `gfs.${runCode}`);
+    const gribFilePath = fs.readdirSync(runGribDir).find(fn => {
+        const stepCode = parseInt(fn.split('.').slice(-1)[0].slice(1));
+        return stepCode === stepNumber;
+    });
+    const targetPath = path.join(netcdfDir, `gfs.${runCode}`);
+    await exec(`mkdir -p ${targetPath}`);
+
+    const parameters = await exec(`../grib2/wgrib2/wgrib2 -s ${gribFilePath}`)
+        .split('\n')
+        .map(p => p.split(':').slice(3).slice(0, -1).join(':'));
+    log(`Got parameters:`, parameters);
+    const targetFileName = `f${stepNumber}.${parameters[0]}`;
+    await exec(`perl ${getGfsPath} data ${runCode} ${firstStepNumber} ${lastStepNumber} ${stepDifference} ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
+}
 
 (async function run() {
     try {
