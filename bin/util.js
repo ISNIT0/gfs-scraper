@@ -160,7 +160,7 @@ function customDownloadGfsStepParams(outFile, url, parameterHeightGroups) {
                                     .reduce(function (acc, lineData, index, arr) {
                                     var nextLineData = arr[index + 1];
                                     var parameter = lineData.parameter, height = lineData.height, byteStartPoint = lineData.byteStartPoint;
-                                    var key = parameter + "-" + height;
+                                    var key = (parameter + "-" + height).replace(/ /g, '');
                                     var fromBytes = byteStartPoint;
                                     var toBytes = !!nextLineData ? nextLineData.byteStartPoint : '*';
                                     acc[key] = [fromBytes, toBytes];
@@ -186,7 +186,7 @@ function customDownloadGfsStepParams(outFile, url, parameterHeightGroups) {
                                     .get({
                                     url: url,
                                     headers: reqHeaders
-                                }, function (resp) {
+                                }, function () {
                                     fileWriteStream.on('finish', function () {
                                         fileWriteStream.close();
                                         resolve();
