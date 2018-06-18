@@ -80,6 +80,9 @@ yargs
             return { parameter: p, height: h };
         });
 
+        const outDir = argv.outFile.split('/').slice(0, -1).join('/');
+        await exec(`mkdir -p ${outDir}`);
+
         const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${argv.run}/gfs.t${runHours}z.pgrb2.0p25.f${argv.step}`;
         await customDownloadGfsStepParams(argv.outFile, url, phGroups);
         log('\n=================== Finishing GFS Downloader ===================\n\n');

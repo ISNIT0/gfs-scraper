@@ -113,7 +113,7 @@ yargs
     },
 }, function (argv) {
     return __awaiter(this, void 0, void 0, function () {
-        var date, runHours, phGroups, url;
+        var date, runHours, phGroups, outDir, url;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -123,9 +123,13 @@ yargs
                         var _a = ph.replace(/ /g, '').split(':'), p = _a[0], h = _a[1];
                         return { parameter: p, height: h };
                     });
+                    outDir = argv.outFile.split('/').slice(0, -1).join('/');
+                    return [4 /*yield*/, child_process_1.exec("mkdir -p " + outDir)];
+                case 1:
+                    _a.sent();
                     url = "http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs." + argv.run + "/gfs.t" + runHours + "z.pgrb2.0p25.f" + argv.step;
                     return [4 /*yield*/, util_1.customDownloadGfsStepParams(argv.outFile, url, phGroups)];
-                case 1:
+                case 2:
                     _a.sent();
                     util_1.log('\n=================== Finishing GFS Downloader ===================\n\n');
                     return [2 /*return*/];
