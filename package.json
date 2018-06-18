@@ -2,11 +2,16 @@
   "name": "gfsscraper",
   "version": "1.0.0",
   "description": "",
-  "main": "bin/index.js",
+  "main": "./bin/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "./build.sh",
+    "start": "node bin/index.js"
   },
+  "files": [
+    "bin",
+    "src"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -22,5 +27,9 @@
     "@types/node": "10.3.3",
     "@types/request-promise-native": "1.0.15",
     "@types/yargs": "11.0.0"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "gfsscraper": "./bin/gfsscraper"
   }
 }
