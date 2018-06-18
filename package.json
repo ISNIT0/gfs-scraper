@@ -21,6 +21,6 @@
     "@types/cheerio": "0.22.7",
     "@types/node": "10.3.3",
     "@types/request-promise-native": "1.0.15",
-    "@types/yargs": "11.0.0",
+    "@types/yargs": "11.0.0"
   }
 }
