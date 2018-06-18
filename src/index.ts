@@ -8,6 +8,7 @@ import {
     leftPad,
     log,
 } from './util';
+import { exec } from 'child_process';
 
 log('\n\n\n==================== Starting GFS Downloader ====================');
 
@@ -46,7 +47,7 @@ yargs
             } catch (err) {
                 log(`Failed to run command:`, err);
             }
-            log('=================== Finishing GFS Downloader ===================\n\n');
+            log('\n=================== Finishing GFS Downloader ===================\n\n');
 
         })
     .command('downloadStep', 'Download specific parameters/heights from a specific run/step', {
@@ -81,7 +82,30 @@ yargs
 
         const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${argv.run}/gfs.t${runHours}z.pgrb2.0p25.f${argv.step}`;
         await customDownloadGfsStepParams(argv.outFile, url, phGroups);
-        log('=================== Finishing GFS Downloader ===================\n\n');
+        log('\n=================== Finishing GFS Downloader ===================\n\n');
+    })
+    .command('grib2netcdf', 'Convert specific grib file to netcdf', {
+        wgrib2: {
+            describe: 'Path to wgrib2',
+            default: 'wgrib2'
+        },
+        inFile: {
+            describe: 'File to convert (grib)',
+            type: 'string',
+            demand: true
+        },
+        outFile: {
+            describe: 'Path the result should be saved in',
+            type: 'string',
+            demand: true
+        }
+    }, async function (argv) {
+        try {
+            await exec(`${argv.wgrib2} -i "${argv.inFile}" -netcdf "${argv.outFile}"`);
+        } catch (err) {
+            console.error(`Error converting grib file:`, err);
+        }
+        log('\n=================== Finishing GFS Downloader ===================\n\n');
     })
     .demandCommand(1, 'Please specify at least one command')
     .help()
