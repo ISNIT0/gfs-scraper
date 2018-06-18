@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var yargs = require("yargs");
+var moment = require("moment");
 var util_1 = require("./util");
 util_1.log('\n\n\n==================== Starting GFS Downloader ====================');
 yargs
@@ -83,6 +84,49 @@ yargs
                     util_1.log("Failed to run command:", err_1);
                     return [3 /*break*/, 5];
                 case 5:
+                    util_1.log('=================== Finishing GFS Downloader ===================\n\n');
+                    return [2 /*return*/];
+            }
+        });
+    });
+})
+    .command('downloadStep', 'Download specific parameters/heights from a specific run/step', {
+    outFile: {
+        describe: 'Path the result should be saved in',
+        type: 'string',
+        demand: true
+    },
+    parameterHeightGroups: {
+        describe: "\"all\" or the parameters/heights you'd like to download",
+        type: 'array',
+        default: ["TMP:2 m above ground"]
+    },
+    run: {
+        type: 'string',
+        describe: 'GFS Formatted Run ID (YYYYMMDDHH)',
+        demand: true
+    },
+    step: {
+        type: 'string',
+        default: '000',
+        describe: 'Left-padded step id (e.g. 000, 003, 009)'
+    },
+}, function (argv) {
+    return __awaiter(this, void 0, void 0, function () {
+        var date, runHours, phGroups, url;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    date = moment(argv.run, 'YYYYMMDDHH');
+                    runHours = util_1.leftPad(date.get('hours'), 2);
+                    phGroups = argv.parameterHeightGroups.map(function (ph) {
+                        var _a = ph.split(':'), p = _a[0], h = _a[1];
+                        return { parameter: p, height: h };
+                    });
+                    url = "http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs." + argv.run + "/gfs.t" + runHours + "z.pgrb2.0p25.f" + argv.step;
+                    return [4 /*yield*/, util_1.customDownloadGfsStepParams(argv.outFile, url, phGroups)];
+                case 1:
+                    _a.sent();
                     util_1.log('=================== Finishing GFS Downloader ===================\n\n');
                     return [2 /*return*/];
             }

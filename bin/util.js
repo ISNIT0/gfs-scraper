@@ -38,9 +38,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path = require("path");
 var exec = require("promised-exec");
 var request = require("request-promise-native");
+var normalRequest = require("request");
 var cheerio = require("cheerio");
 var fs = require("fs");
 var moment = require("moment");
+function leftPad(number, targetLength) {
+    var str = String(number);
+    return '0'.repeat(Math.max(targetLength - str.length, 0)) + str;
+}
+exports.leftPad = leftPad;
 function getLatestAvailableGfsRun() {
     log("Getting latest available GFS runs");
     return request.get("http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/")
@@ -129,6 +135,76 @@ exports.getDownloadedGfsRunSteps = getDownloadedGfsRunSteps;
 //         .reverse();
 //     return latestDownloadedSteps;
 // }
+function customDownloadGfsStepParams(outFile, url, parameterHeightGroups) {
+    if (parameterHeightGroups === void 0) { parameterHeightGroups = 'all'; }
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                    var reqHeaders, inventoryStr, inventory_1, rangeString, fileWriteStream;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                reqHeaders = {};
+                                if (!(parameterHeightGroups !== 'all')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, request.get(url + ".idx")];
+                            case 1:
+                                inventoryStr = _a.sent();
+                                inventory_1 = inventoryStr.split('\n')
+                                    .map(function (invLine) {
+                                    var _a = invLine.split(':'), index = _a[0], byteStartPoint = _a[1], date = _a[2], parameter = _a[3], height = _a[4], fcst = _a[5];
+                                    return {
+                                        index: index, byteStartPoint: byteStartPoint, date: date, parameter: parameter, height: height, fcst: fcst
+                                    };
+                                })
+                                    .reduce(function (acc, lineData, index, arr) {
+                                    var nextLineData = arr[index + 1];
+                                    var parameter = lineData.parameter, height = lineData.height, byteStartPoint = lineData.byteStartPoint;
+                                    var key = parameter + "-" + height;
+                                    var fromBytes = byteStartPoint;
+                                    var toBytes = !!nextLineData ? nextLineData.byteStartPoint : '*';
+                                    acc[key] = [fromBytes, toBytes];
+                                    return acc;
+                                }, {});
+                                rangeString = 'bytes=' + parameterHeightGroups.map(function (_a) {
+                                    var height = _a.height, parameter = _a.parameter;
+                                    var key = parameter + "-" + height;
+                                    return inventory_1[key];
+                                })
+                                    .sort((function (a, b) { return a[0] < b[0] ? 1 : -1; }))
+                                    .map(function (bytes) { return bytes.join('-'); })
+                                    .join(', ');
+                                reqHeaders = {
+                                    "Range": rangeString
+                                };
+                                return [3 /*break*/, 2];
+                            case 2:
+                                console.log("Using Url:", url);
+                                console.log("Using Headers:", reqHeaders);
+                                fileWriteStream = fs.createWriteStream(outFile);
+                                normalRequest
+                                    .get({
+                                    url: url,
+                                    headers: reqHeaders
+                                }, function (resp) {
+                                    fileWriteStream.on('finish', function () {
+                                        fileWriteStream.close();
+                                        resolve();
+                                    });
+                                }).on('error', function (err) {
+                                    fs.unlink(outFile, function () { });
+                                    console.error("Failed to download file:", err);
+                                    reject(err);
+                                })
+                                    .pipe(fileWriteStream);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); })];
+        });
+    });
+}
+exports.customDownloadGfsStepParams = customDownloadGfsStepParams;
 function log() {
     var messages = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -148,7 +224,7 @@ function downloadGfsStep(downloadDir, runCode, firstStepNumber, lastStepNumber, 
                 case 0:
                     log("Downloading GFS Step: [runCode=" + runCode + "] [firstStepNumber=" + firstStepNumber + "] [lastStepNumber=" + lastStepNumber + "] [stepDifference=" + stepDifference + "] [parameters=" + parameters + "] [levels=" + levels + "]");
                     getGfsPath = path.join(__dirname, "../get_gfs.pl");
-                    targetPath = path.join(downloadDir, "gfs." + runCode);
+                    targetPath = path.join(downloadDir, "gfs", runCode);
                     return [4 /*yield*/, exec("mkdir -p " + targetPath)];
                 case 1:
                     _a.sent();

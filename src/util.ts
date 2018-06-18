@@ -1,9 +1,15 @@
 import * as path from 'path';
 import exec = require('promised-exec');
 import * as request from 'request-promise-native';
+import * as normalRequest from 'request';
 import * as cheerio from 'cheerio';
 import * as fs from 'fs';
 import * as moment from 'moment';
+
+export function leftPad(number: any, targetLength: number) {
+    const str = String(number);
+    return '0'.repeat(Math.max(targetLength - str.length, 0)) + str;
+}
 
 export function getLatestAvailableGfsRun() {
     log(`Getting latest available GFS runs`);
@@ -85,15 +91,78 @@ export async function getDownloadedGfsRunSteps(downloadDir: string, runCode: str
 //     return latestDownloadedSteps;
 // }
 
+
+export async function customDownloadGfsStepParams(outFile: string, url: string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
+    return new Promise(async (resolve, reject) => {
+        let reqHeaders = {};
+        if (parameterHeightGroups !== 'all') {
+            const inventoryStr = <string>await request.get(`${url}.idx`);
+            const inventory = inventoryStr.split('\n')
+                .map(invLine => {
+                    const [index, byteStartPoint, date, parameter, height, fcst] = invLine.split(':');
+                    return {
+                        index, byteStartPoint, date, parameter, height, fcst
+                    };
+                })
+                .reduce((acc: any, lineData, index, arr) => {
+                    const nextLineData = arr[index + 1];
+                    const { parameter, height, byteStartPoint } = lineData;
+                    const key = `${parameter}-${height}`;
+
+                    const fromBytes = byteStartPoint;
+
+                    const toBytes = !!nextLineData ? nextLineData.byteStartPoint : '*';
+                    acc[key] = [fromBytes, toBytes];
+                    return acc;
+                }, {});
+
+
+            const rangeString = 'bytes=' + parameterHeightGroups.map(({ height, parameter }) => {
+                const key = `${parameter}-${height}`;
+                return inventory[key];
+            })
+                .sort(((a, b) => a[0] < b[0] ? 1 : -1))
+                .map((bytes) => bytes.join('-'))
+                .join(', ');
+
+            reqHeaders = {
+                "Range": rangeString
+            };
+
+        } else {
+            // Download whole file
+        }
+
+        console.log(`Using Url:`, url);
+        console.log(`Using Headers:`, reqHeaders);
+
+        const fileWriteStream = fs.createWriteStream(outFile);
+        normalRequest
+            .get({
+                url: url,
+                headers: reqHeaders
+            }, function (resp) {
+                fileWriteStream.on('finish', function () {
+                    fileWriteStream.close();
+                    resolve();
+                });
+            }).on('error', function (err) {
+                fs.unlink(outFile, () => { });
+                console.error(`Failed to download file:`, err);
+                reject(err);
+            })
+            .pipe(fileWriteStream);
+    });
+}
+
 export function log(...messages: any[]) {
     console.log(`[${(new Date()).toUTCString()}]`, ...messages);
 }
 
-
 export async function downloadGfsStep(downloadDir: string, runCode: string, firstStepNumber: number, lastStepNumber: number, parameters = ['all'], levels = ['all'], stepDifference = 3) {
     log(`Downloading GFS Step: [runCode=${runCode}] [firstStepNumber=${firstStepNumber}] [lastStepNumber=${lastStepNumber}] [stepDifference=${stepDifference}] [parameters=${parameters}] [levels=${levels}]`);
     const getGfsPath = path.join(__dirname, `../get_gfs.pl`);
-    const targetPath = path.join(downloadDir, `gfs.${runCode}`);
+    const targetPath = path.join(downloadDir, `gfs`, runCode);
     await exec(`mkdir -p ${targetPath}`);
     await exec(`perl ${getGfsPath} data ${runCode} ${firstStepNumber} ${lastStepNumber} ${stepDifference} ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
 }
