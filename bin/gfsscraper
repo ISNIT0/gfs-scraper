@@ -159,7 +159,8 @@ yargs
                     return [4 /*yield*/, child_process_1.exec(argv.wgrib2 + " -i \"" + argv.inFile + "\" -netcdf \"" + argv.outFile + "\"")];
                 case 1:
                     out = _a.sent();
-                    out.stderr.on('data', function (msg) { return console.error(msg); });
+                    out.stdout.on('data', function (msg) { return console.info('INFO:', msg); });
+                    out.stderr.on('data', function (msg) { return console.error('ERR:', msg); });
                     return [3 /*break*/, 3];
                 case 2:
                     err_2 = _a.sent();
