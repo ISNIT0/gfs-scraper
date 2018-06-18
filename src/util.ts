@@ -107,7 +107,7 @@ export async function customDownloadGfsStepParams(outFile: string, url: string, 
                 .reduce((acc: any, lineData, index, arr) => {
                     const nextLineData = arr[index + 1];
                     const { parameter, height, byteStartPoint } = lineData;
-                    const key = `${parameter}-${height}`;
+                    const key = `${parameter}-${height}`.replace(/ /g, '');
 
                     const fromBytes = byteStartPoint;
 

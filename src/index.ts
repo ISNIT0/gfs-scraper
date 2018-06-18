@@ -75,7 +75,7 @@ yargs
         const runHours = leftPad(date.get('hours'), 2);
 
         const phGroups = argv.parameterHeightGroups.map((ph: string) => {
-            const [p, h] = ph.split(':');
+            const [p, h] = ph.replace(/ /g, '').split(':');
             return { parameter: p, height: h };
         });
 
