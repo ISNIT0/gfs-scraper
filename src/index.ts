@@ -101,7 +101,8 @@ yargs
         }
     }, async function (argv) {
         try {
-            await exec(`${argv.wgrib2} -i "${argv.inFile}" -netcdf "${argv.outFile}"`);
+            const out = await exec(`${argv.wgrib2} -i "${argv.inFile}" -netcdf "${argv.outFile}"`);
+            out.stderr.on('data', (msg) => console.error(msg));
         } catch (err) {
             console.error(`Error converting grib file:`, err);
         }

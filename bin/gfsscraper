@@ -151,14 +151,15 @@ yargs
     }
 }, function (argv) {
     return __awaiter(this, void 0, void 0, function () {
-        var err_2;
+        var out, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     return [4 /*yield*/, child_process_1.exec(argv.wgrib2 + " -i \"" + argv.inFile + "\" -netcdf \"" + argv.outFile + "\"")];
                 case 1:
-                    _a.sent();
+                    out = _a.sent();
+                    out.stderr.on('data', function (msg) { return console.error(msg); });
                     return [3 /*break*/, 3];
                 case 2:
                     err_2 = _a.sent();
