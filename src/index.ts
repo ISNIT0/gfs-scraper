@@ -101,7 +101,7 @@ yargs
         }
     }, async function (argv) {
         try {
-            const out = await exec(`${argv.wgrib2} -i "${argv.inFile}" -netcdf "${argv.outFile}"`);
+            const out = await exec(`${argv.wgrib2} -s "${argv.inFile}" | ${argv.wgrib2} -i "${argv.inFile}" -netcdf "${argv.outFile}"`);
             out.stdout.on('data', (msg) => console.info('INFO:', msg));
             out.stderr.on('data', (msg) => console.error('ERR:', msg));
         } catch (err) {
