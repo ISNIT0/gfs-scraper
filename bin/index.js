@@ -124,6 +124,7 @@ yargs
                         return { parameter: p, height: h };
                     });
                     outDir = argv.outFile.split('/').slice(0, -1).join('/');
+                    console.log("Making directory: [" + outDir + "]");
                     return [4 /*yield*/, child_process_1.exec("mkdir -p " + outDir)];
                 case 1:
                     _a.sent();
