@@ -32,7 +32,7 @@ yargs
         downloadDirectory: {
             describe: 'Directory to Download GFS Files to',
             type: 'string',
-            default: './download',
+            default: './download/gfs',
         }
     },
         async function (argv: any) {

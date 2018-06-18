@@ -241,15 +241,15 @@ function downloadAllStepsForRun(downloadDir, runCode, parameters, heights) {
     if (parameters === void 0) { parameters = ['all']; }
     if (heights === void 0) { heights = ['all']; }
     return __awaiter(this, void 0, void 0, function () {
-        var downloadedSteps, availableSteps, stepsToDownload, stepsByStepGap, _a, _b, _i, stepGap, steps;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var downloadedSteps, availableSteps, stepsToDownload, stepsByStepGap, date, runHours, _a, _b, _i, stepGap, steps, downloadPath, _c, _d, _e, step, downloadTarget, url;
+        return __generator(this, function (_f) {
+            switch (_f.label) {
                 case 0: return [4 /*yield*/, getDownloadedGfsRunSteps(downloadDir, runCode)];
                 case 1:
-                    downloadedSteps = _c.sent();
+                    downloadedSteps = _f.sent();
                     return [4 /*yield*/, getAvailableGfsRunSteps(runCode)];
                 case 2:
-                    availableSteps = _c.sent();
+                    availableSteps = _f.sent();
                     stepsToDownload = availableSteps.filter(function (a) { return !~downloadedSteps.indexOf(a); }).sort(function (a, b) { return a - b; });
                     log("Found [" + availableSteps.length + "] Steps - Already Downloaded [" + downloadedSteps.length + "] Steps - Downloading [" + stepsToDownload.length + "] Steps");
                     if (!availableSteps.length) {
@@ -273,24 +273,43 @@ function downloadAllStepsForRun(downloadDir, runCode, parameters, heights) {
                         acc[stepGap].push(actualStep);
                         return acc;
                     }, {});
+                    date = moment(runCode, 'YYYYMMDDHH');
+                    runHours = leftPad(date.get('hours'), 2);
                     _a = [];
                     for (_b in stepsByStepGap)
                         _a.push(_b);
                     _i = 0;
-                    _c.label = 3;
+                    _f.label = 3;
                 case 3:
-                    if (!(_i < _a.length)) return [3 /*break*/, 6];
+                    if (!(_i < _a.length)) return [3 /*break*/, 9];
                     stepGap = _a[_i];
                     log("Downloading range [" + stepsToDownload[0] + "] to [" + stepsToDownload.slice(-1)[0] + "] with [stepGap=" + stepGap + "]");
                     steps = stepsByStepGap[stepGap];
-                    return [4 /*yield*/, downloadGfsStep(downloadDir, runCode, steps[0], steps.slice(-1)[0], parameters, heights, parseInt(stepGap))];
+                    downloadPath = path.join(downloadDir, runCode);
+                    return [4 /*yield*/, exec("mkdir -p " + downloadPath)];
                 case 4:
-                    _c.sent();
-                    _c.label = 5;
+                    _f.sent();
+                    _c = [];
+                    for (_d in steps)
+                        _c.push(_d);
+                    _e = 0;
+                    _f.label = 5;
                 case 5:
+                    if (!(_e < _c.length)) return [3 /*break*/, 8];
+                    step = _c[_e];
+                    downloadTarget = path.join(downloadPath, leftPad(step, 3) + ".grib2");
+                    url = "http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs." + runCode + "/gfs.t" + runHours + "z.pgrb2.0p25.f" + leftPad(step, 3);
+                    return [4 /*yield*/, customDownloadGfsStepParams(downloadTarget, url, 'all')];
+                case 6:
+                    _f.sent();
+                    _f.label = 7;
+                case 7:
+                    _e++;
+                    return [3 /*break*/, 5];
+                case 8:
                     _i++;
                     return [3 /*break*/, 3];
-                case 6: return [2 /*return*/];
+                case 9: return [2 /*return*/];
             }
         });
     });

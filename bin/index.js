@@ -60,7 +60,7 @@ yargs
     downloadDirectory: {
         describe: 'Directory to Download GFS Files to',
         type: 'string',
-        default: './download',
+        default: './download/gfs',
     }
 }, function (argv) {
     return __awaiter(this, void 0, void 0, function () {

@@ -202,11 +202,22 @@ export async function downloadAllStepsForRun(downloadDir: string, runCode: strin
         return acc;
     }, {});
 
+    const date = moment(runCode, 'YYYYMMDDHH');
+    const runHours = leftPad(date.get('hours'), 2);
+
     for (let stepGap in stepsByStepGap) {
         log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}] with [stepGap=${stepGap}]`);
 
         const steps = stepsByStepGap[stepGap];
+        const downloadPath = path.join(downloadDir, runCode);
+        await exec(`mkdir -p ${downloadPath}`);
 
-        await downloadGfsStep(downloadDir, runCode, steps[0], steps.slice(-1)[0], parameters, heights, parseInt(stepGap));
+        for (let step in steps) {
+            const downloadTarget = path.join(downloadPath, `${leftPad(step, 3)}.grib2`);
+
+            const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${runCode}/gfs.t${runHours}z.pgrb2.0p25.f${leftPad(step, 3)}`;
+            await customDownloadGfsStepParams(downloadTarget, url, 'all');
+            // await downloadGfsStep(downloadDir, runCode, steps[0], steps.slice(-1)[0], parameters, heights, parseInt(stepGap));
+        }
     }
 }
