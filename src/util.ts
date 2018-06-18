@@ -141,7 +141,7 @@ export async function customDownloadGfsStepParams(outFile: string, url: string, 
             .get({
                 url: url,
                 headers: reqHeaders
-            }, function (resp) {
+            }, function () {
                 fileWriteStream.on('finish', function () {
                     fileWriteStream.close();
                     resolve();
