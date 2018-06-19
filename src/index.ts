@@ -46,6 +46,7 @@ yargs
 
             } catch (err) {
                 log(`Failed to run command:`, err);
+                process.exit(1);
             }
             log('\n=================== Finishing GFS Downloader ===================\n\n');
 
@@ -80,12 +81,17 @@ yargs
             return { parameter: p, height: h };
         });
 
-        const outDir = argv.outFile.split('/').slice(0, -1).join('/');
-        console.log(`Making directory: [${outDir}]`);
-        await exec(`mkdir -p ${outDir}`);
+        try {
+            const outDir = argv.outFile.split('/').slice(0, -1).join('/');
+            console.log(`Making directory: [${outDir}]`);
+            await exec(`mkdir -p ${outDir}`);
 
-        const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${argv.run}/gfs.t${runHours}z.pgrb2.0p25.f${argv.step}`;
-        await customDownloadGfsStepParams(argv.outFile, url, phGroups);
+            const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${argv.run}/gfs.t${runHours}z.pgrb2.0p25.f${argv.step}`;
+            await customDownloadGfsStepParams(argv.outFile, url, phGroups);
+        } catch (err) {
+            console.error(`Error converting grib file:`, err);
+            process.exit(1);
+        }
         log('\n=================== Finishing GFS Downloader ===================\n\n');
     })
     .command('grib2netcdf', 'Convert specific grib file to netcdf', {
@@ -110,6 +116,7 @@ yargs
             out.stderr.on('data', (msg) => console.error('ERR:', msg));
         } catch (err) {
             console.error(`Error converting grib file:`, err);
+            process.exit(1);
         }
         log('\n=================== Finishing GFS Downloader ===================\n\n');
     })
