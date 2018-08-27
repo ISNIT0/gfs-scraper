@@ -94,64 +94,70 @@ export async function getDownloadedGfsRunSteps(downloadDir: string, runCode: str
 
 export async function customDownloadGfsStepParams(outFile: string, url: string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
     return new Promise(async (resolve, reject) => {
-        let reqHeaders = {};
-        if (parameterHeightGroups !== 'all') {
-            const inventoryStr = <string>await request.get(`${url}.idx`);
-            const inventory = inventoryStr.split('\n')
-                .map(invLine => {
-                    const [index, byteStartPoint, date, parameter, height, fcst] = invLine.split(':');
-                    return {
-                        index, byteStartPoint, date, parameter, height, fcst
-                    };
+        try {
+            let reqHeaders = {};
+            if (parameterHeightGroups !== 'all') {
+                const inventoryUrl = `${url}.idx`;
+                console.info(`Fetching inventory from [${inventoryUrl}]`);
+                const inventoryStr = <string>await request.get(inventoryUrl);
+                const inventory = inventoryStr.split('\n')
+                    .map(invLine => {
+                        const [index, byteStartPoint, date, parameter, height, fcst] = invLine.split(':');
+                        return {
+                            index, byteStartPoint, date, parameter, height, fcst
+                        };
+                    })
+                    .reduce((acc: any, lineData, index, arr) => {
+                        const nextLineData = arr[index + 1];
+                        const { parameter, height, byteStartPoint } = lineData;
+                        const key = `${parameter}-${height}`.replace(/ /g, '');
+
+                        const fromBytes = byteStartPoint;
+
+                        const toBytes = !!nextLineData ? nextLineData.byteStartPoint : '*';
+                        acc[key] = [fromBytes, toBytes];
+                        return acc;
+                    }, {});
+
+
+                const rangeString = 'bytes=' + parameterHeightGroups.map(({ height, parameter }) => {
+                    const key = `${parameter}-${height}`;
+                    return inventory[key];
                 })
-                .reduce((acc: any, lineData, index, arr) => {
-                    const nextLineData = arr[index + 1];
-                    const { parameter, height, byteStartPoint } = lineData;
-                    const key = `${parameter}-${height}`.replace(/ /g, '');
+                    .sort(((a, b) => a[0] < b[0] ? 1 : -1))
+                    .map((bytes) => bytes.join('-'))
+                    .join(', ');
 
-                    const fromBytes = byteStartPoint;
+                reqHeaders = {
+                    "Range": rangeString
+                };
 
-                    const toBytes = !!nextLineData ? nextLineData.byteStartPoint : '*';
-                    acc[key] = [fromBytes, toBytes];
-                    return acc;
-                }, {});
+            } else {
+                // Download whole file
+            }
 
+            console.log(`Using Url:`, url);
+            console.log(`Using Headers:`, reqHeaders);
 
-            const rangeString = 'bytes=' + parameterHeightGroups.map(({ height, parameter }) => {
-                const key = `${parameter}-${height}`;
-                return inventory[key];
-            })
-                .sort(((a, b) => a[0] < b[0] ? 1 : -1))
-                .map((bytes) => bytes.join('-'))
-                .join(', ');
-
-            reqHeaders = {
-                "Range": rangeString
-            };
-
-        } else {
-            // Download whole file
+            const fileWriteStream = fs.createWriteStream(outFile);
+            normalRequest
+                .get({
+                    url: url,
+                    headers: reqHeaders
+                }, function () {
+                    fileWriteStream.on('finish', function () {
+                        fileWriteStream.close();
+                        resolve();
+                    });
+                }).on('error', function (err) {
+                    fs.unlink(outFile, () => { });
+                    console.error(`Failed to download file:`, err);
+                    reject(err);
+                })
+                .pipe(fileWriteStream);
+        } catch (err) {
+            reject(err);
         }
-
-        console.log(`Using Url:`, url);
-        console.log(`Using Headers:`, reqHeaders);
-
-        const fileWriteStream = fs.createWriteStream(outFile);
-        normalRequest
-            .get({
-                url: url,
-                headers: reqHeaders
-            }, function () {
-                fileWriteStream.on('finish', function () {
-                    fileWriteStream.close();
-                    resolve();
-                });
-            }).on('error', function (err) {
-                fs.unlink(outFile, () => { });
-                console.error(`Failed to download file:`, err);
-                reject(err);
-            })
-            .pipe(fileWriteStream);
     });
 }
 

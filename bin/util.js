@@ -141,13 +141,16 @@ function customDownloadGfsStepParams(outFile, url, parameterHeightGroups) {
         var _this = this;
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                    var reqHeaders, inventoryStr, inventory_1, rangeString, fileWriteStream;
+                    var reqHeaders, inventoryUrl, inventoryStr, inventory_1, rangeString, fileWriteStream_1, err_1;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
+                                _a.trys.push([0, 3, , 4]);
                                 reqHeaders = {};
                                 if (!(parameterHeightGroups !== 'all')) return [3 /*break*/, 2];
-                                return [4 /*yield*/, request.get(url + ".idx")];
+                                inventoryUrl = url + ".idx";
+                                console.info("Fetching inventory from [" + inventoryUrl + "]");
+                                return [4 /*yield*/, request.get(inventoryUrl)];
                             case 1:
                                 inventoryStr = _a.sent();
                                 inventory_1 = inventoryStr.split('\n')
@@ -181,14 +184,14 @@ function customDownloadGfsStepParams(outFile, url, parameterHeightGroups) {
                             case 2:
                                 console.log("Using Url:", url);
                                 console.log("Using Headers:", reqHeaders);
-                                fileWriteStream = fs.createWriteStream(outFile);
+                                fileWriteStream_1 = fs.createWriteStream(outFile);
                                 normalRequest
                                     .get({
                                     url: url,
                                     headers: reqHeaders
                                 }, function () {
-                                    fileWriteStream.on('finish', function () {
-                                        fileWriteStream.close();
+                                    fileWriteStream_1.on('finish', function () {
+                                        fileWriteStream_1.close();
                                         resolve();
                                     });
                                 }).on('error', function (err) {
@@ -196,8 +199,13 @@ function customDownloadGfsStepParams(outFile, url, parameterHeightGroups) {
                                     console.error("Failed to download file:", err);
                                     reject(err);
                                 })
-                                    .pipe(fileWriteStream);
-                                return [2 /*return*/];
+                                    .pipe(fileWriteStream_1);
+                                return [3 /*break*/, 4];
+                            case 3:
+                                err_1 = _a.sent();
+                                reject(err_1);
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
                         }
                     });
                 }); })];
