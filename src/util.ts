@@ -77,22 +77,7 @@ export async function getDownloadedGfsRunSteps(downloadDir: string, runCode: str
     return latestDownloadedSteps;
 }
 
-
-// export async function getConvertedGfsRunSteps(runCode: string) {
-//     log(`Getting converted GFS steps for run [${runCode}]`);
-//     const stepNetcdfDir = path.join(netcdfDir, `gfs.${runCode}`);
-//     await exec(`mkdir -p ${stepNetcdfDir}`);
-//     const latestDownloadedSteps = fs.readdirSync(stepNetcdfDir)
-//         .filter(file => file.match(/\f[0-9]+/))
-//         .map(file => file.split('.')[0].slice(1))
-//         .map(stepHour => parseInt(stepHour))
-//         .sort(((a, b) => a - b))
-//         .reverse();
-//     return latestDownloadedSteps;
-// }
-
-
-export async function customDownloadGfsStepParams(outFile: string, url: string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
+export async function downloadGfsStep(outFile: string, url: string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
     return new Promise(async (resolve, reject) => {
         try {
             let reqHeaders = {};
@@ -165,15 +150,7 @@ export function log(...messages: any[]) {
     console.log(`[${(new Date()).toUTCString()}]`, ...messages);
 }
 
-export async function downloadGfsStep(downloadDir: string, runCode: string, firstStepNumber: number, lastStepNumber: number, parameters = ['all'], levels = ['all'], stepDifference = 3) {
-    log(`Downloading GFS Step: [runCode=${runCode}] [firstStepNumber=${firstStepNumber}] [lastStepNumber=${lastStepNumber}] [stepDifference=${stepDifference}] [parameters=${parameters}] [levels=${levels}]`);
-    const getGfsPath = path.join(__dirname, `../get_gfs.pl`);
-    const targetPath = path.join(downloadDir, `gfs`, runCode);
-    await exec(`mkdir -p ${targetPath}`);
-    await exec(`perl ${getGfsPath} data ${runCode} ${firstStepNumber} ${lastStepNumber} ${stepDifference} ${parameters.join(':')} ${levels.join(':')} ${targetPath}`);
-}
-
-export async function downloadAllStepsForRun(downloadDir: string, runCode: string, parameters = ['all'], heights = ['all']) {
+export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: string, parameters = ['all'], heights = ['all']) {
     const downloadedSteps = await getDownloadedGfsRunSteps(downloadDir, runCode);
     const availableSteps = await getAvailableGfsRunSteps(runCode);
 
@@ -222,8 +199,7 @@ export async function downloadAllStepsForRun(downloadDir: string, runCode: strin
             const downloadTarget = path.join(downloadPath, `${leftPad(step, 3)}.grib2`);
 
             const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${runCode}/gfs.t${runHours}z.pgrb2.0p25.f${leftPad(step, 3)}`;
-            await customDownloadGfsStepParams(downloadTarget, url, 'all');
-            // await downloadGfsStep(downloadDir, runCode, steps[0], steps.slice(-1)[0], parameters, heights, parseInt(stepGap));
+            await downloadGfsStep(downloadTarget, url, 'all');
         }
     }
 }

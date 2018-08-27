@@ -3,14 +3,30 @@ import * as moment from 'moment';
 
 import {
     getLatestAvailableGfsRun,
-    downloadAllStepsForRun,
-    customDownloadGfsStepParams,
+    downloadAllStepsForGFSRun,
+    downloadGfsStep,
     leftPad,
     log,
 } from './util';
 import { exec } from 'child_process';
 
 log('\n\n\n==================== Starting GFS Downloader ====================');
+
+function downloadStep(outFile: string, run: string, _step: number | string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
+    const step = leftPad(_step, 3);
+
+    const hours = moment(run, 'YYYYMMDDHH').get('hours');
+    const runHours = leftPad(hours, 2);
+
+    const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${run}/gfs.t${runHours}z.pgrb2.0p25.f${step}`;
+    return downloadGfsStep(outFile, url, parameterHeightGroups);
+}
+
+export {
+    downloadStep,
+    getLatestAvailableGfsRun as getLatestRun,
+    downloadAllStepsForGFSRun
+};
 
 yargs
     .command('downloadRun', 'Find and download all available steps from the latest available run', {
@@ -42,7 +58,7 @@ yargs
                     runToFetch = await getLatestAvailableGfsRun();
                 }
 
-                await downloadAllStepsForRun(argv.downloadDirectory, runToFetch);
+                await downloadAllStepsForGFSRun(argv.downloadDirectory, runToFetch);
 
             } catch (err) {
                 log(`Failed to run command:`, err);
@@ -87,7 +103,7 @@ yargs
             await exec(`mkdir -p ${outDir}`);
 
             const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${argv.run}/gfs.t${runHours}z.pgrb2.0p25.f${argv.step}`;
-            await customDownloadGfsStepParams(argv.outFile, url, phGroups);
+            await downloadGfsStep(argv.outFile, url, phGroups);
         } catch (err) {
             console.error(`Error converting grib file:`, err);
             process.exit(1);
