@@ -36,7 +36,7 @@ See [`example/example.ts`](./example/example.ts)
 
 
 ## Justification
-The industry standard for GFS GRIB file downloading is [`get_gfs.pl`](). There's nothing particularly wrong with this, but it's a shame to have yet another language/tool to learn for new weather developers. It also doesn't scale particularly well or provide an API to other systems.
+The industry standard for GFS GRIB file downloading is [`get_gfs.pl`](http://www.cpc.ncep.noaa.gov/products/wesley/get_gfs.html). There's nothing particularly wrong with this, but it's a shame to have yet another language/tool to learn for new weather developers. It also doesn't scale particularly well or provide an API to other systems.
 
 Also, making new things is **fun**!
 
