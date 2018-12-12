@@ -1,4 +1,6 @@
 # GFS Scraper
+![Safe NPM](https://safenpm.herokuapp.com/status/gfsscraper.png)
+
 ## Installation
 ```bash
 > npm i -g gfsscraper
