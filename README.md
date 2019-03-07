@@ -42,7 +42,7 @@ See [`example/example.ts`](./example/example.ts)
 
 
 ## Justification
-The industry standard for GFS GRIB file downloading is [`get_gfs.pl`](http://www.cpc.ncep.noaa.gov/products/wesley/get_gfs.html). There's nothing particularly wrong with this, but it's a shame to have yet another language/tool to learn for new weather developers. It also doesn't scale particularly well or provide an API to other systems.
+The industry standard for GFS GRIB file downloading is [`get_gfs.pl`](http://www.cpc.ncep.noaa.gov/products/wesley/get_gfs.html). It's quite old, and not a whole lot of people are proficient in perl... Hopefully TypeScript is easier to maintain and improve!
 
 Also, making new things is **fun**!
 
@@ -54,6 +54,11 @@ Also, making new things is **fun**!
 ## Building
 ```bash
 > ./build.sh
+```
+
+## Testing
+```bash
+> npm t
 ```
 
 ## License
