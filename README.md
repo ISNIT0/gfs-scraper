@@ -1,7 +1,7 @@
 # GFS Scraper
 ![npm](https://img.shields.io/npm/v/gfsscraper.svg)
 [![Build Status](https://travis-ci.org/ISNIT0/gfs-scraper.svg?branch=master)](https://travis-ci.org/ISNIT0/gfs-scraper)
-![Codecov](https://img.shields.io/codecov/c/github/isnit0/gfsscraper.svg)
+[![codecov](https://codecov.io/gh/ISNIT0/gfs-scraper/branch/master/graph/badge.svg)](https://codecov.io/gh/ISNIT0/gfs-scraper)
 [![CodeFactor](https://www.codefactor.io/repository/github/isnit0/gfs-scraper/badge)](https://www.codefactor.io/repository/github/isnit0/gfs-scraper)
 ![NPM License](https://img.shields.io/npm/l/gfsscraper.svg)
 
