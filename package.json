@@ -5,8 +5,9 @@
   "main": "./bin/index.js",
   "scripts": {
     "lint": "npx tslint src/**/*.ts test/**/*.ts",
-    "test": "npm run test:no-spec",
-    "test:no-spec": "NODE_ENV=test ts-node --files node_modules/tape/bin/tape test/**/*.ts",
+    "test": "npm run test:no-spec | tap-spec",
+    "test:full": "TEST_MODE=full npm run test:no-spec",
+    "test:no-spec": "NODE_ENV=test ts-node --files -r tsconfig-paths/register node_modules/tape/bin/tape test/**/*.ts",
     "build": "./build.sh",
     "start": "node bin/index.js"
   },
@@ -21,21 +22,25 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/blue-tape": "^0.1.32",
-    "blue-tape": "^1.0.0",
+    "@types/mkdirp-promise": "^5.0.0",
     "cheerio": "1.0.0-rc.2",
+    "mkdirp-promise": "^5.0.1",
     "moment": "2.22.2",
-    "promised-exec": "1.0.1",
     "request": "2.87.0",
     "request-promise-native": "1.0.5",
-    "ts-node": "^8.0.3",
     "yargs": "11.0.0"
   },
   "devDependencies": {
+    "@types/blue-tape": "^0.1.32",
     "@types/cheerio": "0.22.7",
     "@types/node": "10.3.3",
     "@types/request-promise-native": "1.0.15",
-    "@types/yargs": "11.0.0"
+    "@types/yargs": "11.0.0",
+    "blue-tape": "^1.0.0",
+    "tap-spec": "^5.0.0",
+    "ts-node": "^8.0.3",
+    "tsconfig-paths": "^3.8.0",
+    "typescript": "^3.3.3333"
   },
   "preferGlobal": true,
   "bin": {

@@ -1,10 +1,11 @@
 import * as path from 'path';
-import exec = require('promised-exec');
+import * as fs from 'fs';
+import { KVS } from './types';
+import mkdirp from 'mkdirp-promise';
+import moment from 'moment';
 import * as request from 'request-promise-native';
 import * as normalRequest from 'request';
 import * as cheerio from 'cheerio';
-import * as fs from 'fs';
-import * as moment from 'moment';
 
 export function leftPad(number: any, targetLength: number) {
     const str = String(number);
@@ -67,7 +68,7 @@ export function getLatestDownloadedGfsRun(downloadDir: string) {
 export async function getDownloadedGfsRunSteps(downloadDir: string, runCode: string) {
     log(`Getting latest downloaded GFS steps for run [${runCode}]`);
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
-    await exec(`mkdir -p ${stepDownloadDir}`);
+    await mkdirp(stepDownloadDir);
     const latestDownloadedSteps = fs.readdirSync(stepDownloadDir)
         .filter((file) => file.slice(-5).match(/\.f[0-9]+/))
         .map((file) => file.split('.').slice(-1)[0].slice(1))
@@ -149,7 +150,7 @@ export function log(...messages: any[]) {
     console.log(`[${(new Date()).toUTCString()}]`, ...messages);
 }
 
-export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: string, parameters = ['all'], heights = ['all']) {
+export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: string) {
     const downloadedSteps = await getDownloadedGfsRunSteps(downloadDir, runCode);
     const availableSteps = await getAvailableGfsRunSteps(runCode);
 
@@ -191,7 +192,7 @@ export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: st
         log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}] with [stepGap=${gap}]`);
 
         const downloadPath = path.join(downloadDir, runCode);
-        await exec(`mkdir -p ${downloadPath}`);
+        await mkdirp(downloadPath);
 
         for (const step of steps) {
             const downloadTarget = path.join(downloadPath, `${leftPad(step, 3)}.grib2`);
