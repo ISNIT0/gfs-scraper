@@ -2,3 +2,4 @@ node_modules
 download
 bin
 .nyc_output
+coverage.lcov
