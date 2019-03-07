@@ -1,9 +1,11 @@
-# GFS Scraper
+# GFS Downloader
 ![npm](https://img.shields.io/npm/v/gfsscraper.svg)
 [![Build Status](https://travis-ci.org/ISNIT0/gfs-scraper.svg?branch=master)](https://travis-ci.org/ISNIT0/gfs-scraper)
 [![codecov](https://codecov.io/gh/ISNIT0/gfs-scraper/branch/master/graph/badge.svg)](https://codecov.io/gh/ISNIT0/gfs-scraper)
 [![CodeFactor](https://www.codefactor.io/repository/github/isnit0/gfs-scraper/badge)](https://www.codefactor.io/repository/github/isnit0/gfs-scraper)
 ![NPM License](https://img.shields.io/npm/l/gfsscraper.svg)
+> A modern, tested, open source GFS model downloader built on NodeJS
+
 
 ## Installation
 ```bash
