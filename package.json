@@ -20,7 +20,7 @@
     "url": "https://github.com/ISNIT0/gfs-scraper"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/mkdirp-promise": "^5.0.0",
     "cheerio": "1.0.0-rc.2",
@@ -28,7 +28,8 @@
     "moment": "2.22.2",
     "request": "2.87.0",
     "request-promise-native": "1.0.5",
-    "yargs": "11.0.0"
+    "yargs": "11.0.0",
+    "typescript": "^3.3.3333"
   },
   "devDependencies": {
     "@types/blue-tape": "^0.1.32",
@@ -39,8 +40,7 @@
     "blue-tape": "^1.0.0",
     "tap-spec": "^5.0.0",
     "ts-node": "^8.0.3",
-    "tsconfig-paths": "^3.8.0",
-    "typescript": "^3.3.3333"
+    "tsconfig-paths": "^3.8.0"
   },
   "preferGlobal": true,
   "bin": {
