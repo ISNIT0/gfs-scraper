@@ -7,9 +7,8 @@
     "npm run test",
   ],
   "install": [
-    "npm ci",
+    "npm i",
     "npm install codecov -g",
-    "npm i typescript",
   ],
   "after_success": [ "codecov" ]
 }
