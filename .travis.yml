@@ -8,5 +8,8 @@
   ],
   "install": [
     "npm ci",
+    "npm install codecov -g",
+    "npm i typescript",
   ],
+  "after_success": [ "codecov" ]
 }
