@@ -7,15 +7,15 @@
     "emitDecoratorMetadata": true,
     "strictNullChecks": false,
     "noImplicitAny": true,
-    "sourceMap": false,
+    "sourceMap": true,
+    "declaration": true,
     "baseUrl": ".",
-    "outDir": "build",
+    "outDir": "bin",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "types": [
       "node"
     ],
-    "sourceMap": true,
     "typeRoots": [
       "node_modules/@types/",
       "./src/"
@@ -38,6 +38,6 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "bin"
   ]
 }
