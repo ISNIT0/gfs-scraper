@@ -1,5 +1,6 @@
 # GFS Scraper
-![Safe NPM](https://safenpm.herokuapp.com/status/gfsscraper.png)
+[![Build Status](https://travis-ci.org/ISNIT0/gfs-scraper.svg?branch=master)](https://travis-ci.org/ISNIT0/gfs-scraper)
+[![CodeFactor](https://www.codefactor.io/repository/github/isnit0/gfs-scraper/badge)](https://www.codefactor.io/repository/github/isnit0/gfs-scraper)
 
 ## Installation
 ```bash
