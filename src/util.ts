@@ -12,6 +12,27 @@ export function leftPad(number: any, targetLength: number) {
     return '0'.repeat(Math.max(targetLength - str.length, 0)) + str;
 }
 
+export function getAvailableGfsRuns() {
+    log(`Getting latest available GFS runs`);
+    return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/`)
+        .then((html: string) => {
+            const $ = cheerio.load(html);
+            const runs = $('a')
+                .toArray()
+                .map((el) => $(el).attr('href'))
+                .filter((a) => a)
+                .filter((href) => href.startsWith('gfs.'))
+                .map((href) => {
+                    return href.replace(/[^0-9]/g, '');
+                })
+                .sort((a, b) => {
+                    return moment(a, 'YYYYMMDDHH').valueOf() > moment(b, 'YYYYMMDDHH').valueOf() ? 1 : -1;
+                })
+                .reverse();
+            return runs;
+        });
+}
+
 export function getLatestAvailableGfsRun() {
     log(`Getting latest available GFS runs`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/`)

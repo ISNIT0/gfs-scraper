@@ -13,6 +13,7 @@
     "outDir": "bin",
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "jsx": "react",
     "types": [
       "node"
     ],
@@ -24,6 +25,7 @@
       "es2017"
     ],
     "paths": {
+        "*": ["types/*"],
       "src/*": [
         "./src/*"
       ],
