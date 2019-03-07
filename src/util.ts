@@ -18,10 +18,10 @@ export function getLatestAvailableGfsRun() {
             const $ = cheerio.load(html);
             const latestGfs = $('a')
                 .toArray()
-                .map(el => $(el).attr('href'))
-                .filter(a => a)
-                .filter(href => href.startsWith('gfs.'))
-                .map(href => {
+                .map((el) => $(el).attr('href'))
+                .filter((a) => a)
+                .filter((href) => href.startsWith('gfs.'))
+                .map((href) => {
                     return href.replace(/[^0-9]/g, '');
                 })
                 .sort((a, b) => {
@@ -35,18 +35,18 @@ export function getLatestAvailableGfsRun() {
 export function getAvailableGfsRunSteps(gfsRunCode: string): Promise<number[]> {
     log(`Getting latest available GFS step for run [${gfsRunCode}]`);
     return request.get(`http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${gfsRunCode}/`)
-        .then(html => {
+        .then((html) => {
             const $ = cheerio.load(html);
             return $('a')
                 .toArray()
-                .map((el: any) => <string>$(el).attr('href'))
-                .filter(a => a)
-                .filter(href => href.startsWith('gfs.'))
-                .filter(file => file.slice(-5).match(/\.f[0-9]+$/))
-                .filter(file => !!~file.indexOf('.pgrb2.1'))
-                .map(file => file.split('.').slice(-1)[0])
-                .map(href => href.slice(1))
-                .map(stepHour => parseInt(stepHour))
+                .map((el: any) => $(el).attr('href') as string)
+                .filter((a) => a)
+                .filter((href) => href.startsWith('gfs.'))
+                .filter((file) => file.slice(-5).match(/\.f[0-9]+$/))
+                .filter((file) => file.includes('.pgrb2.1'))
+                .map((file) => file.split('.').slice(-1)[0])
+                .map((href) => href.slice(1))
+                .map((stepHour) => Math.floor(Number(stepHour)))
                 .reverse();
         });
 }
@@ -54,8 +54,8 @@ export function getAvailableGfsRunSteps(gfsRunCode: string): Promise<number[]> {
 export function getLatestDownloadedGfsRun(downloadDir: string) {
     const downloads = fs.readdirSync(downloadDir);
     const latestDownloaded = downloads
-        .filter(dir => dir.startsWith('gfs.'))
-        .map(dir => {
+        .filter((dir) => dir.startsWith('gfs.'))
+        .map((dir) => {
             return dir.replace(/[^0-9]/g, '');
         })
         .sort((a, b) => {
@@ -69,27 +69,27 @@ export async function getDownloadedGfsRunSteps(downloadDir: string, runCode: str
     const stepDownloadDir = path.join(downloadDir, `gfs.${runCode}`);
     await exec(`mkdir -p ${stepDownloadDir}`);
     const latestDownloadedSteps = fs.readdirSync(stepDownloadDir)
-        .filter(file => file.slice(-5).match(/\.f[0-9]+/))
-        .map(file => file.split('.').slice(-1)[0].slice(1))
-        .map(stepHour => parseInt(stepHour))
+        .filter((file) => file.slice(-5).match(/\.f[0-9]+/))
+        .map((file) => file.split('.').slice(-1)[0].slice(1))
+        .map((stepHour) => Math.floor(Number(stepHour)))
         .sort(((a, b) => a - b))
         .reverse();
     return latestDownloadedSteps;
 }
 
-export async function downloadGfsStep(outFile: string, url: string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
+export async function downloadGfsStep(outFile: string, url: string, parameterHeightGroups: Array<{ height: string, parameter: string }> | 'all' = 'all') {
     return new Promise(async (resolve, reject) => {
         try {
             let reqHeaders = {};
             if (parameterHeightGroups !== 'all') {
                 const inventoryUrl = `${url}.idx`;
                 console.info(`Fetching inventory from [${inventoryUrl}]`);
-                const inventoryStr = <string>await request.get(inventoryUrl);
+                const inventoryStr = await request.get(inventoryUrl) as string;
                 const inventory = inventoryStr.split('\n')
-                    .map(invLine => {
+                    .map((invLine) => {
                         const [index, byteStartPoint, date, parameter, height, fcst] = invLine.split(':');
                         return {
-                            index, byteStartPoint, date, parameter, height, fcst
+                            index, byteStartPoint, date, parameter, height, fcst,
                         };
                     })
                     .reduce((acc: any, lineData, index, arr) => {
@@ -104,7 +104,6 @@ export async function downloadGfsStep(outFile: string, url: string, parameterHei
                         return acc;
                     }, {});
 
-
                 const rangeString = 'bytes=' + parameterHeightGroups.map(({ height, parameter }) => {
                     const key = `${parameter}-${height}`;
                     return inventory[key];
@@ -114,7 +113,7 @@ export async function downloadGfsStep(outFile: string, url: string, parameterHei
                     .join(', ');
 
                 reqHeaders = {
-                    "Range": rangeString
+                    Range: rangeString,
                 };
 
             } else {
@@ -127,15 +126,15 @@ export async function downloadGfsStep(outFile: string, url: string, parameterHei
             const fileWriteStream = fs.createWriteStream(outFile);
             normalRequest
                 .get({
-                    url: url,
-                    headers: reqHeaders
+                    url,
+                    headers: reqHeaders,
                 }, function () {
                     fileWriteStream.on('finish', function () {
                         fileWriteStream.close();
                         resolve();
                     });
                 }).on('error', function (err) {
-                    fs.unlink(outFile, () => { });
+                    fs.unlink(outFile, () => { /* NOOP */ });
                     console.error(`Failed to download file:`, err);
                     reject(err);
                 })
@@ -154,7 +153,7 @@ export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: st
     const downloadedSteps = await getDownloadedGfsRunSteps(downloadDir, runCode);
     const availableSteps = await getAvailableGfsRunSteps(runCode);
 
-    const stepsToDownload = availableSteps.filter(a => !~downloadedSteps.indexOf(a)).sort((a, b) => a - b);
+    const stepsToDownload = availableSteps.filter((a) => !downloadedSteps.includes(a)).sort((a, b) => a - b);
 
     log(`Found [${availableSteps.length}] Steps - Already Downloaded [${downloadedSteps.length}] Steps - Downloading [${stepsToDownload.length}] Steps`);
 
@@ -168,7 +167,7 @@ export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: st
         return;
     }
 
-    const stepsByStepGap = stepsToDownload.reduce((acc: any, step, index, arr) => {
+    const stepsByStepGap = stepsToDownload.reduce((acc, step, index, arr) => {
         const actualStep = step;
         const isLastStep = index === arr.length + 1;
 
@@ -183,19 +182,18 @@ export async function downloadAllStepsForGFSRun(downloadDir: string, runCode: st
         acc[stepGap].push(actualStep);
 
         return acc;
-    }, {});
+    }, {} as KVS<number[]>);
 
     const date = moment(runCode, 'YYYYMMDDHH');
     const runHours = leftPad(date.get('hours'), 2);
 
-    for (let stepGap in stepsByStepGap) {
-        log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}] with [stepGap=${stepGap}]`);
+    for (const [gap, steps] of Object.entries(stepsByStepGap)) {
+        log(`Downloading range [${stepsToDownload[0]}] to [${stepsToDownload.slice(-1)[0]}] with [stepGap=${gap}]`);
 
-        const steps = stepsByStepGap[stepGap];
         const downloadPath = path.join(downloadDir, runCode);
         await exec(`mkdir -p ${downloadPath}`);
 
-        for (let step in steps) {
+        for (const step of steps) {
             const downloadTarget = path.join(downloadPath, `${leftPad(step, 3)}.grib2`);
 
             const url = `http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.${runCode}/gfs.t${runHours}z.pgrb2.0p25.f${leftPad(step, 3)}`;

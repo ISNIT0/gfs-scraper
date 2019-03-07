@@ -12,7 +12,7 @@ import { exec } from 'child_process';
 
 log('\n\n\n==================== Starting GFS Downloader ====================');
 
-function downloadStep(outFile: string, run: string, _step: number | string, parameterHeightGroups: { height: string, parameter: string }[] | 'all' = 'all') {
+function downloadStep(outFile: string, run: string, _step: number | string, parameterHeightGroups: Array<{ height: string, parameter: string }> | 'all' = 'all') {
     const step = leftPad(_step, 3);
 
     const hours = moment(run, 'YYYYMMDDHH').get('hours');
@@ -25,31 +25,31 @@ function downloadStep(outFile: string, run: string, _step: number | string, para
 export {
     downloadStep,
     getLatestAvailableGfsRun as getLatestRun,
-    downloadAllStepsForGFSRun
+    downloadAllStepsForGFSRun,
 };
 
-yargs
+const noop = yargs
     .command('downloadRun', 'Find and download all available steps from the latest available run', {
         parameters: {
             type: 'array',
             default: ['all'],
-            describe: 'Parameters to pass to get_gfs.pl'
+            describe: 'Parameters to pass to get_gfs.pl',
         },
         heights: {
             type: 'array',
             default: ['all'],
-            describe: 'Heights to pass to get_gfs.pl'
+            describe: 'Heights to pass to get_gfs.pl',
         },
         run: {
             type: 'string',
             default: 'latest',
-            describe: '"latest" or GFS Formatted Run ID (YYYYMMDDHH)'
+            describe: '"latest" or GFS Formatted Run ID (YYYYMMDDHH)',
         },
         downloadDirectory: {
             describe: 'Directory to Download GFS Files to',
             type: 'string',
             default: './download/gfs',
-        }
+        },
     },
         async function (argv: any) {
             try {
@@ -71,22 +71,22 @@ yargs
         outFile: {
             describe: 'Path the result should be saved in',
             type: 'string',
-            demand: true
+            demand: true,
         },
         parameterHeightGroups: {
             describe: `"all" or the parameters/heights you'd like to download`,
             type: 'array',
-            default: ["TMP:2 m above ground"]
+            default: ['TMP:2 m above ground'],
         },
         run: {
             type: 'string',
             describe: 'GFS Formatted Run ID (YYYYMMDDHH)',
-            demand: true
+            demand: true,
         },
         step: {
             type: 'string',
             default: '000',
-            describe: 'Left-padded step id (e.g. 000, 003, 009)'
+            describe: 'Left-padded step id (e.g. 000, 003, 009)',
         },
     }, async function (argv) {
         const date = moment(argv.run, 'YYYYMMDDHH');
@@ -113,18 +113,18 @@ yargs
     .command('grib2netcdf', 'Convert specific grib file to netcdf', {
         wgrib2: {
             describe: 'Path to wgrib2',
-            default: 'wgrib2'
+            default: 'wgrib2',
         },
         inFile: {
             describe: 'File to convert (grib)',
             type: 'string',
-            demand: true
+            demand: true,
         },
         outFile: {
             describe: 'Path the result should be saved in',
             type: 'string',
-            demand: true
-        }
+            demand: true,
+        },
     }, async function (argv) {
         try {
             const out = await exec(`${argv.wgrib2} -s "${argv.inFile}" | ${argv.wgrib2} -i "${argv.inFile}" -netcdf "${argv.outFile}"`);

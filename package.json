@@ -4,6 +4,7 @@
   "description": "",
   "main": "./bin/index.js",
   "scripts": {
+    "lint": "npx tslint src/**/*.ts test/**/*.ts",
     "test": "npm run test:no-spec",
     "test:no-spec": "NODE_ENV=test ts-node --files node_modules/tape/bin/tape test/**/*.ts",
     "build": "./build.sh",
